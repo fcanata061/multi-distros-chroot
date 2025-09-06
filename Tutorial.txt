@@ -1,0 +1,120 @@
+Tutorial: Usando tmux com Gentoo, Arch e Void em chroot
+
+Este guia explica como usar o script `chroot-multi.sh` para gerenciar múltiplos sistemas Linux (Gentoo, Arch e Void) em chroot, com o tmux configurado para facilitar o uso.
+
+------------------------------------------------------------
+1. O que é tmux?
+------------------------------------------------------------
+O tmux é um multiplexador de terminais. Ele permite abrir várias sessões de terminal dentro de uma única janela, alternar entre elas, dividir a tela em painéis e manter sessões rodando mesmo após fechar o terminal.
+
+Com ele, você pode ter:
+- Uma janela para o Gentoo (host).
+- Uma janela para o Arch (chroot).
+- Uma janela para o Void (chroot).
+- Todas dentro de uma sessão tmux com status bar mostrando métricas do sistema.
+
+------------------------------------------------------------
+2. Como funciona o script chroot-multi.sh
+------------------------------------------------------------
+O script faz o seguinte:
+1. Monta os diretórios necessários para Void e Arch (/dev, /proc, /sys, /run, /dev/dri, /dev/snd, /tmp/.X11-unix).
+2. Copia o arquivo .Xauthority para permitir rodar programas gráficos dentro do chroot.
+3. Cria um arquivo ~/.tmux.conf com tema, atalhos e status bar.
+4. Abre uma sessão tmux chamada "multi" com 3 janelas:
+   - gentoo-1 → terminal no host Gentoo.
+   - arch-2 → terminal dentro do Arch chroot.
+   - void-3 → terminal dentro do Void chroot.
+
+------------------------------------------------------------
+3. Atalhos configurados no tmux
+------------------------------------------------------------
+
+Prefixo:
+- O prefixo foi trocado para Ctrl+A (mais fácil que o padrão Ctrl+B).
+- Use Ctrl+A antes de qualquer comando.
+
+Gerenciamento de splits:
+- Ctrl+A, | → split horizontal.
+- Ctrl+A, - → split vertical.
+- Ctrl+A, x → fechar painel atual.
+- Ctrl+Setas → mover entre splits.
+
+Gerenciamento de janelas:
+- Ctrl+A, c → criar nova janela.
+- Ctrl+A, & → fechar janela.
+- Ctrl+A, n → ir para próxima janela.
+- Ctrl+A, p → ir para janela anterior.
+
+Atalhos rápidos (sem prefixo):
+- F1 → vai para Gentoo (janela 1).
+- F2 → vai para Arch (janela 2).
+- F3 → vai para Void (janela 3).
+
+------------------------------------------------------------
+4. Status bar personalizada
+------------------------------------------------------------
+Parte esquerda:
+- Nome da sessão (multi) e número/nome da janela.
+
+Parte direita:
+- Uso de CPU (%).
+- Memória usada/total.
+- Temperatura (precisa do pacote lm-sensors).
+- Hora e data.
+
+Exemplo:
+[multi] 1:gentoo-1 | CPU: 12% MEM: 1.2G/8G TEMP: +45°C  14:32 06-09-2025
+
+------------------------------------------------------------
+5. Dependências
+------------------------------------------------------------
+Para usar os monitores da status bar, instale lm-sensors:
+
+Gentoo:
+  sudo emerge sys-apps/lm-sensors
+
+Arch:
+  sudo pacman -S lm_sensors
+
+Void:
+  sudo xbps-install -S lm_sensors
+
+Depois rode:
+  sudo sensors-detect
+
+------------------------------------------------------------
+6. Como usar o script
+------------------------------------------------------------
+1. Torne o script executável:
+   chmod +x chroot-multi.sh
+
+2. Execute:
+   ./chroot-multi.sh
+
+3. Vai abrir o tmux com 3 janelas:
+   - gentoo-1 (host Gentoo).
+   - arch-2 (chroot Arch).
+   - void-3 (chroot Void).
+
+Você pode alternar entre elas com F1, F2, F3.
+
+------------------------------------------------------------
+7. Saindo do tmux
+------------------------------------------------------------
+- Para desanexar (deixar rodando em segundo plano):
+  Ctrl+A d
+
+- Para reativar depois:
+  tmux attach -t multi
+
+- Para matar a sessão completamente:
+  tmux kill-session -t multi
+
+------------------------------------------------------------
+8. Resumo
+------------------------------------------------------------
+Com este setup, você consegue:
+- Usar Gentoo como host.
+- Entrar em Arch e Void via chroot.
+- Rodar programas gráficos do chroot no Xorg do Gentoo.
+- Gerenciar tudo dentro de um tmux estilizado com status bar completa.
